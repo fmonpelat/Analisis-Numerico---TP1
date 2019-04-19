@@ -17,6 +17,7 @@ import timeit #Para calcular tiempo de corrida
 import numpy as np #Manejo de arrays
 import sys
 sys.setrecursionlimit(500)
+import math 
 # para graficar
 import plotly
 import plotly.plotly as py
@@ -25,30 +26,61 @@ import plotly.graph_objs as go
 
 
 #Funciones prueba
-def f1(x): 
-    return x**2-2
-def df1(x): 
-    return 2*x
-def ddf1(x): 
+def f1(y): 
+    return y**2-2
+def df1(y): 
+    return 2*y
+def ddf1(y): 
     return 2
-def gf1(x):
-    return (x+2)/(x+1)
+def gf1(y):
+    return (y+2)/(y+1)
 
 # funcion lineal
-def fl(x): 
-    return x
-def dfl(x): 
+def fl(y): 
+    return y
+def dfl(y): 
     return 1
-def ddfl(x): 
+def ddfl(y): 
     return 0
 
-# Funcion TP 
-def f(t): 
-    return 
-def df(t): 
-    return 0
-def ddf(t): 
-    return 0
+# Funcion TP cuando m=0 (ayuda con las derivadas con el wolfram alpha)
+def f(y): 
+    return (-2*10*y*(1-(2.051)/math.sqrt(math.pow(y,2)+1)))
+def gf(y):
+    return (y*2.051/math.sqrt(math.pow(y,2)+1)) 
+    #return (y-2*10*y*(1-(2.051)/math.sqrt(math.pow(y,2)+1)))
+def df(y): 
+    return (-20-((41.02*math.pow(y,2))/math.pow((1 + math.pow(y,2)),3/2)) + 41.02/math.sqrt(1+math.pow(y,2)))
+def ddf(y): 
+    return ((-123.06*y)/((math.sqrt(1 + math.pow(y,2) ) *(1. + math.pow(y,2) )**2)))
+
+# Funcion TP cuando tenemos mg (ayuda con las derivadas con el wolfram alpha)
+def f2(y,m): 
+    g=9.81
+    k=10
+    Lo=2.051
+    a=1
+    return (-2*k*y-m*g+((2*k*y*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2)))))
+    -2*10*y - 1.025*9.81 + (( 2*10*y*2.051)/sqrt(y**2+1))
+def gf2(y,m):
+    g=9.81
+    k=10
+    Lo=2.051
+    a=1
+    return ( (m*g)/(-2*k+(2*k*lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2)))) )
+    #(1.025*9.81)/((-2*10*2.051)/sqrt(y**2+1))
+def df2(y): 
+    #con los parametros:
+    #g=9.81
+    #k=10
+    #Lo=2.051
+    #a=1
+    #m0=1.025
+    return -20-(41.02 math.pow(y,2))/(1 + math.pow(math.pow(y,2),3/2) + 41.02/sqrt(1 + math.pow(y,2))
+
+
+
+
 
 def GraficarDiferencia(NewtonRaphsonData,fixedPointData,BisectData):
     # data1,data2,data3 son arrays con puntos a ser graficados
@@ -84,7 +116,6 @@ def GraficarDiferencia(NewtonRaphsonData,fixedPointData,BisectData):
     fig = dict(data=data, layout=layout)
     plotly.offline.plot(fig, auto_open=True)
     return
-
 
 def Graficar(root,iterator,trace0descr,trace1descr,graphtitle):
     # para graficar
@@ -158,7 +189,6 @@ def Graficar(root,iterator,trace0descr,trace1descr,graphtitle):
     fig2 = dict(data=data, layout=layout)
     plotly.offline.plot(fig2, auto_open=True)
     return
-
 
 def maxIntervalNewtonRaphson(initial,f,df,a_tol):
     # Funcion para el punto 3
@@ -271,8 +301,8 @@ def secante(f, x0, x1, a_tol, n_max):
     return x. delta, i+1
 
 #Intervalo para buscar raiz
-a = 0.0
-b = 2.0
+a = 0.2
+b = 5
 
 #Parametros para el algoritmo
 a_tol1 = 0.5e-15
@@ -287,26 +317,27 @@ print('----------------')
 print('')
 print('Funcion f1, a_tol = '+str(a_tol1))
 iterator=0
-root=10
+root=3
 data1 = []
-print('K,Yk,delta Y,deltaY/Yk,lambda,p')
-root, iterator = NewtonRaphson(f1,df1,root,a_tol1,iterator,n_max,data1)
+print('K  ,Yk,delta Y,deltaY/Yk,lambda,p')
+root, iterator = NewtonRaphson(f,df,root,a_tol1,iterator,n_max,data1)
 print('raiz = ' +str(root))
 print('n_ite= ' +str(iterator))
 print('')
 # Graficar(root,iterator,trace0descr,trace1descr,graphtitle)
 #Graficar(root,iterator,'funcion analizada y = xˆ2 - 2','Funcion y=x','Gráfica de análisis')
 
+
 print('----------------')
 print('Metodo punto fijo')
 print('----------------')
 print('')
-print('Funcion gf1, a_tol = '+str(a_tol1))
+print('Funcion gf, a_tol = '+str(a_tol1))
 iterator=0
-root=10
+root=0.72
 data2 = []
 print('K,Yk,delta Y,deltaY/Yk,lambda,p')
-root, iterator = FixedPoint(gf1,root,a_tol1,iterator,n_max,data2)
+root, iterator = FixedPoint(gf,root,a_tol1,iterator,n_max,data2)
 print('raiz = ' +str(root))
 print('n_ite= ' +str(iterator))
 print('')
@@ -318,7 +349,7 @@ print('----------------')
 print('')
 print('Funcion f1, a_tol = '+str(a_tol1))
 data3 = []
-r, delta, n_iter = bisec(f1, a, b, a_tol1, n_max,data3)
+r, delta, n_iter = bisec(f, a, b, a_tol1, n_max,data3)
 print('raiz = ' +str(r))
 print('delta= ' +str(delta))
 print('n_ite= ' +str(n_iter))
