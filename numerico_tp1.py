@@ -51,6 +51,7 @@ def f2(y,m=1.025*0.3):
     Lo=2.051
     a=1
     #return (-2*k*y-m*g+((2*k*y*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2)))))
+    -2*10*y - 1.025*0.3*9.81 + (2*10*y*2.051)/sqrt(pow(y,2)+1)
     return (-2*10*y - m*g + (( 2*10*y*2.051)/math.sqrt(math.pow(y,2)+1)))
     #(-2*10*y - 0.3075*9.81 + (( 2*10*y*2.051)/sqrt(pow(y,2)+1)))
 def gf2(y,m=1.025*0.3):
@@ -111,6 +112,7 @@ def GraficarDiferencia(NewtonRaphsonData,fixedPointData,BisectData):
     plotly.offline.plot(fig, auto_open=True)
     return
 
+"""
 def Graficar(root,iterator,trace0descr,trace1descr,graphtitle):
     # para graficar
     xx = np.linspace(0, 4, 256)
@@ -183,7 +185,7 @@ def Graficar(root,iterator,trace0descr,trace1descr,graphtitle):
     fig2 = dict(data=data, layout=layout)
     plotly.offline.plot(fig2, auto_open=True)
     return
-
+"""
     
 #Funcion que devuelve un intervalo de convergencia para alguna raiz de una funcion con el metodo de newton raphson
 def intConv(f,df,nRoot,intPrecision,counter_array):
@@ -396,7 +398,7 @@ def print_convergence_table(printdata):
     print('k, $Y_{k}$, $\Delta Y$, $\dfrac{\Delta Y}{Y_{k}}$')
     for i in range(len(printdata)):
       k=printdata[i]['k']+1
-      print ('{0:.1f},{1:.15f},{2:.4f},{3:.4f}'.format(k,printdata[i]['root'],printdata[i]['delta'],printdata[i]['delta/root']))
+      print ('{0:},{1:.15f},{2:.4f},{3:.4f}'.format(k,printdata[i]['root'],printdata[i]['delta'],printdata[i]['delta/root']))
 
     ## latex style
     print ('--- LATEX TABLE  ---')
@@ -407,13 +409,13 @@ def print_convergence_table(printdata):
       stop= length - trunc_iter
       del printdata[start:stop]
     #printing only hline rows
-    print('\\begin{table}[h]')
-    print('\makegapedcells\n\centering\n\\resizebox{\\textwidth}{!}{\n')
-    print('\\begin{tabular}{|l|l|l|l|l|l|}')
-    print('\hline k & Y$_{k}$ & $\Delta$ Y & $frac{\Delta Y}{Y_{k}}$ \\\\')
+    print('\\begin{table}[H]')
+    print('\makegapedcells\n\centering\n\\resizebox{\\textwidth}{!}{')
+    print('\\begin{tabular}{|c|c|c|c|c|c|}')
+    print('\hline k & Y$_{k}$ & $\Delta$ Y & $\dfrac{\Delta Y}{Y_{k}}$ \\\\')
     for i in range(len(printdata)):
       k=printdata[i]['k']+1
-      print ('\hline {0:.1f} & {1:.15f} & {2:.4f} & {3:.4f} \\\\'
+      print ('\hline {0:} & {1:.15f} & {2:.4f} & {3:.4f} \\\\'
       .format(k,printdata[i]['root'],printdata[i]['delta'],printdata[i]['delta/root']))
     print('\hline\n\end{tabular}}')
     print('\end{table}')
@@ -427,7 +429,7 @@ def print_start_table(printdata):
     print('k, ak, bk, f(ak), f(bk), rk+1, deltar k+1, delta r/r')
     for i in range(len(printdata)):
       k=printdata[i]['k']+1
-      print ('{0:},{1:},{2:},{3:.4f},{4:.4f},{5:.15f},{6:.4f},{7:.4f}'
+      print ('{0:},{1:.4f},{2:},{3:.4f},{4:.4f},{5:.15f},{6:.4f},{7:.4f}'
       .format(k,printdata[i]['ak'],printdata[i]['bk'],printdata[i]['Fak'],printdata[i]['Fbk'],printdata[i]['Rk1'],printdata[i]['deltaRk1'],
       printdata[i]['deltaR/R']))
 
@@ -440,13 +442,13 @@ def print_start_table(printdata):
       stop= length - trunc_iter
       del printdata[start:stop]
 
-    print('\\begin{table}[h]')
-    print('\makegapedcells\n\centering\n\\resizebox{\\textwidth}{!}{\n')
-    print('\\begin{tabular}{|l|l|l|l|l|l|l|l|}')
+    print('\\begin{table}[H]')
+    print('\makegapedcells\n\centering\n\\resizebox{\\textwidth}{!}{')
+    print('\\begin{tabular}{|c|c|c|c|c|c|c|c|}')
     print('\hline k & a$_{k}$ & b$_{k}$ & f(a$_{k}$) & f(b$_{k}$) & r$_{k+1}$ & $\Delta r_{k+1}$ & $\dfrac{\Delta r}{r}$ \\\\')
     for i in range(len(printdata)):
       k=printdata[i]['k']+1
-      print ('\hline {0:} & {1:} & {2:f} & {3:.4f} & {4:.4f} & {5:.15f} & {6:.4f} & {7:.4f} \\\\'
+      print ('\hline {0:} & {1:.4f} & {2:.4f} & {3:.4f} & {4:.4f} & {5:.16f} & {6:.4f} & {7:.4f} \\\\'
       .format(k,printdata[i]['ak'],printdata[i]['bk'],printdata[i]['Fak'],printdata[i]['Fbk'],printdata[i]['Rk1'],printdata[i]['deltaRk1'],
       printdata[i]['deltaR/R']))
     print('\hline\n\end{tabular}}')
@@ -455,7 +457,6 @@ def print_start_table(printdata):
     return
 
 
-"""
 
 ##########
 ## EJ1
@@ -474,7 +475,7 @@ print('----------------')
 print('Metodo biseccion')
 print('----------------')
 #Intervalo para buscar raiz
-a = -3
+a = 0.2
 b = 3
 data3 = [] # array para guardar los deltas del metodo en cada iteracion
 printdata=[]
@@ -498,17 +499,17 @@ print('----------------')
 print('Metodo Newton Raphson')
 print('----------------')
 iterator=0
-root=-2
+root=1
 data1 = []
 printdata=[]
 print('K  ,Yk,delta Y,deltaY/Yk')
 root, iterator = NewtonRaphson(f,df,root,a_tol1,iterator,n_max,data1,printdata)
 print_convergence_table(printdata)
 
-GraficarDiferencia(data1,data2,data3)
+#GraficarDiferencia(data1,data2,data3)
+
+
 """
-
-
 ##########
 ## EJ2
 #Repetir el procedimiento realizado en el ítem 1) para el caso m=0.3*m0
@@ -596,6 +597,8 @@ PrintMaxInteval(f2,df2,root)
 print_convergence_table(printdata)
 
 #GraficarDiferencia(dataNR1,dataPF1,dataB1)
+
+"""
 
 """
 start, end = maxIntervalNewtonRaphson(0,f2,df2,a_tol1)
