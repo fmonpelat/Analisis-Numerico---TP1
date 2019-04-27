@@ -12,17 +12,17 @@ err = 0.5*10ˆ-15
 """
 
 from scipy.optimize import brentq
-import timeit #Para calcular tiempo de corrida
 import numpy as np #Manejo de arrays
 import sys
-sys.setrecursionlimit(500)
+sys.setrecursionlimit(10000000)
 import math 
 # para graficar
 import plotly
 import plotly.plotly as py
 plotly.tools.set_credentials_file(username='fmonpelat', api_key='YpD7z4O34340q0GZGbC7')
+#plotly.tools.set_credentials_file(username='fmonpelat', api_key='xxxxxx')
 import plotly.graph_objs as go
-# para debug
+# debug
 from pprint import pprint
 
 # funcion lineal
@@ -45,15 +45,17 @@ def ddf(y):
     return ((-123.06*y)/((math.sqrt(1 + math.pow(y,2) ) *(1. + math.pow(y,2) )**2)))
 
 # Funcion TP cuando tenemos mg (ayuda con las derivadas con el wolfram alpha)
-def f2(y,m=1.025*0.3): 
+#def f2(y,m=1.025*1.5): 
+def f2(y,m=0): 
     g=9.81
     k=10
     Lo=2.051
     a=1
     #return (-2*k*y-m*g+((2*k*y*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2)))))
-    -2*10*y - 1.025*0.3*9.81 + (2*10*y*2.051)/sqrt(pow(y,2)+1)
     return (-2*10*y - m*g + (( 2*10*y*2.051)/math.sqrt(math.pow(y,2)+1)))
     #(-2*10*y - 0.3075*9.81 + (( 2*10*y*2.051)/sqrt(pow(y,2)+1)))
+
+# primera funcion de g(x) para el metodo de punto fijo ej2
 def gf2(y,m=1.025*0.3):
     g=9.81
     k=10
@@ -61,22 +63,44 @@ def gf2(y,m=1.025*0.3):
     a=1
     #return (y + 2*k*y - (2*k*y*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2))) + m*g)
     #return ( (m*g)/(-2*k+(2*k*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2)))) )
-    return ((y*Lo/(math.sqrt(math.pow(y,2)+math.pow(a,2)))) - (m*g)/(2*k))
+
+    # este es el return por la cual las 2 raices de los extremos funciona.
+    #return ((y*Lo/(math.sqrt(math.pow(y,2)+math.pow(a,2)))) - (m*g)/(2*k))
     #(1.025*9.81)/((-2*10*2.051)/sqrt(y**2+1))
+    #return ((20*y +9.81*1.025*0.3)*(math.sqrt(y**2+1)))/(2*10*2.051) 
+    # este return nos da la ec de g para la raiz positiva primera (dar el int donde esta g funciona)
+    return ((-m*g)/(2*k-2*k*Lo/(math.sqrt(math.pow(y,2)+math.pow(a,1) ))))
+
+# segunda funcion de g(x) para el metodo de punto fijo ej2
+def gf3(y,m=1.025*0.3):
+    g=9.81
+    k=10
+    Lo=2.051
+    a=1
+    #return (y + 2*k*y - (2*k*y*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2))) + m*g)
+    #return ( (m*g)/(-2*k+(2*k*Lo)/(math.sqrt(math.pow(y,2)+math.pow(a,2)))) )
+    # este es el return por la cual las 2 raices de los extremos funciona.
+    return ((y*Lo/(math.sqrt(math.pow(y,2)+math.pow(a,2)))) - (m*g)/(2*k))
+    
+
 def df2(y): 
     #con los parametros:
     #g=9.81
     #k=10
     #Lo=2.051
     #a=1
-    #m0=1.025 (la derivada es la misma independientenente de su masa (su termino cuando se deriva es 0))
+    #m0=1.025 (IMPORTANTE: la derivada es la misma independientenente de su masa (su termino cuando se deriva es 0))
     return (-20-((41.02*math.pow(y,2))/(math.pow((1 + math.pow(y,2)),3/2))) + 41.02/math.sqrt(1 + math.pow(y,2)))
     #return (-20-(41.02*math.pow(y,2))/(1 + math.pow(math.pow(y,2),3/2)) + 41.02/math.sqrt(1 + math.pow(y,2)) )
 
 
 
 
-
+#Funcion que imprime gráfico mediante plotly de las diferencias entre muestras
+# Recibe:
+# NewtonRaphsonData = datos en array de cada diferencia por el metodo de newton
+# fixedPointData = datos en array de cada diferencia por el metodo de punto fijo
+# BisectData = datos en array de cada diferencia por el metodo de bisección
 def GraficarDiferencia(NewtonRaphsonData,fixedPointData,BisectData):
     # data1,data2,data3 son arrays con puntos a ser graficados
     # TODO hay que ajustar estos valores de linspace ya que el gráfico es logaritmico
@@ -112,82 +136,13 @@ def GraficarDiferencia(NewtonRaphsonData,fixedPointData,BisectData):
     plotly.offline.plot(fig, auto_open=True)
     return
 
-"""
-def Graficar(root,iterator,trace0descr,trace1descr,graphtitle):
-    # para graficar
-    xx = np.linspace(0, 4, 256)
-    yy1 = f1(xx)
-    yy2 = fl(xx)
-
-    trace0 = go.Scatter(
-                        x=xx,
-                        y=yy1,
-                        name = trace0descr,
-                        line = dict(
-                                    color = ('rgb(205, 12, 24)'),
-                                    width = 4
-                                    )
-                        )
-    trace1 = go.Scatter(
-                        x = xx,
-                        y = yy2,
-                        name = trace1descr,
-                        line = dict(
-                                    color = ('rgb(22, 96, 167)'),
-                                    width = 4,
-                                    dash = 'dash'
-                                    )
-                        )
-    layout = dict(title = graphtitle,
-                xaxis = dict(title = 'X'),
-                yaxis = dict(title = 'Y'),
-                shapes = [{
-                'type': 'line',
-                'x0': root,
-                'y0': -4,
-                'x1': root,
-                'y1': 10,
-                'line': {
-                    'color': 'rgb(55, 128, 191)',
-                    'dash': 'dot',
-                    'width': 3,}
-                }],
-                annotations=[
-                                dict(
-                                    x=root,
-                                    y=0,
-                                    xref='x',
-                                    yref='y',
-                                    text='<b>Raiz = '+str(root)+'</b><br>Iteraciones = '+str(iterator),
-                                    showarrow=True,
-                                    font=dict(
-                                        family='Courier New, monospace',
-                                        size=15,
-                                        color='#000000'
-                                    ),
-                                    align='center',
-                                    arrowhead=2,
-                                    arrowsize=1,
-                                    arrowwidth=2,
-                                    arrowcolor='#636363',
-                                    ax=150,
-                                    ay=-150,
-                                    bordercolor='#ffffff',
-                                    borderwidth=2,
-                                    borderpad=4,
-                                    bgcolor='#ffffff',
-                                    opacity=0.8
-                                )
-        ]
-                )
-    data = [trace0,trace1]
-    #la figura es un dicccionario de data(traces) y el layout (que tambien es un dicccionario)
-    fig2 = dict(data=data, layout=layout)
-    plotly.offline.plot(fig2, auto_open=True)
-    return
-"""
-    
 #Funcion que devuelve un intervalo de convergencia para alguna raiz de una funcion con el metodo de newton raphson
+# Recibe:
+# f = Función
+# df = Serivada de la función
+# nRoot = Semilla inicial (se utiliza como semilla la raiz desde donde nos movemos)
+# intPrecision = Incremento en el eje x 
+# counter_array = Array devuelto por referencia que contendra las iteraciones maximas hasta obtener el intervalo.
 def intConv(f,df,nRoot,intPrecision,counter_array):
     root = nRoot
     pos = 0
@@ -258,7 +213,12 @@ def intConv(f,df,nRoot,intPrecision,counter_array):
     return nStInt, nEnInt
     """
 
-def PrintMaxInteval(f2,df2,root):
+#Funcion que imprime el intervalo de convergencia mediante el metodo de newton
+# Recibe:
+# f2 = funcion 
+# df2 = derivada de la funcion f2
+# root = raiz para el intervalo
+def PrintMaxInterval(f2,df2,root):
     IncPrecision = 0.0001
     maxXpos=50
     start, end = intConv(f2,df2,root,IncPrecision,counter_array)
@@ -276,6 +236,7 @@ def bisec(function, start, stop, a_tol, n_max, arr_delta,printdata):
     Datos deben cumplir f(a)*f(b) > 0
     """
     debug = 0
+    i = 0
     x = start+(stop-start)/2    #mejor que (a+b)/2 segun Burden
     delta = (stop-start)/2
     #print('{0:^4} {1:^17} {2:^17} {3:^17}'.format('i', 'x', 'start', 'stop'))
@@ -311,7 +272,7 @@ def bisec(function, start, stop, a_tol, n_max, arr_delta,printdata):
     return x, delta, i+1
 
 def FixedPoint(f,seed,a_tol,n,n_max,arr_delta,printdata):
-    debug = 0
+    debug = 1
     #  para que converga la seed debe satisfacer |f'(seed)|<1
     # arrdelta devuelve un array de diferencias entre valores
     if n>n_max: 
@@ -338,7 +299,7 @@ def FixedPoint(f,seed,a_tol,n,n_max,arr_delta,printdata):
         return FixedPoint(f,root_aux,a_tol,n+1,n_max,arr_delta,printdata)
 
 def NewtonRaphson(f,df,seed,a_tol,n,n_max,arr_delta,printdata):
-    debug = 0
+    debug = 1
     #  para que converga la seed debe satisfacer |f'(seed)|<1
     if n>n_max: 
         raise ValueError('No hubo convergencia')
@@ -398,7 +359,7 @@ def print_convergence_table(printdata):
     print('k, $Y_{k}$, $\Delta Y$, $\dfrac{\Delta Y}{Y_{k}}$')
     for i in range(len(printdata)):
       k=printdata[i]['k']+1
-      print ('{0:},{1:.15f},{2:.4f},{3:.4f}'.format(k,printdata[i]['root'],printdata[i]['delta'],printdata[i]['delta/root']))
+      print ('{0:},{1:.15f},{2:.15f},{3:.15f}'.format(k,printdata[i]['root'],printdata[i]['delta'],printdata[i]['delta/root']))
 
     ## latex style
     print ('--- LATEX TABLE  ---')
@@ -410,12 +371,12 @@ def print_convergence_table(printdata):
       del printdata[start:stop]
     #printing only hline rows
     print('\\begin{table}[H]')
-    print('\makegapedcells\n\centering\n\\resizebox{\\textwidth}{!}{')
-    print('\\begin{tabular}{|c|c|c|c|c|c|}')
+    print('\makegapedcells\n\centering\n\\resizebox{0.55\\textwidth}{!}{')
+    print('\\begin{tabular}{|c|c|c|c|}')
     print('\hline k & Y$_{k}$ & $\Delta$ Y & $\dfrac{\Delta Y}{Y_{k}}$ \\\\')
     for i in range(len(printdata)):
       k=printdata[i]['k']+1
-      print ('\hline {0:} & {1:.15f} & {2:.4f} & {3:.4f} \\\\'
+      print ('\hline {0:} & {1:.15f} & {2:.15f} & {3:.15f} \\\\'
       .format(k,printdata[i]['root'],printdata[i]['delta'],printdata[i]['delta/root']))
     print('\hline\n\end{tabular}}')
     print('\end{table}')
@@ -443,7 +404,7 @@ def print_start_table(printdata):
       del printdata[start:stop]
 
     print('\\begin{table}[H]')
-    print('\makegapedcells\n\centering\n\\resizebox{\\textwidth}{!}{')
+    print('\makegapedcells\n\centering\n\\resizebox{0.55\\textwidth}{!}{')
     print('\\begin{tabular}{|c|c|c|c|c|c|c|c|}')
     print('\hline k & a$_{k}$ & b$_{k}$ & f(a$_{k}$) & f(b$_{k}$) & r$_{k+1}$ & $\Delta r_{k+1}$ & $\dfrac{\Delta r}{r}$ \\\\')
     for i in range(len(printdata)):
@@ -499,17 +460,17 @@ print('----------------')
 print('Metodo Newton Raphson')
 print('----------------')
 iterator=0
-root=1
+root=-1
 data1 = []
 printdata=[]
 print('K  ,Yk,delta Y,deltaY/Yk')
 root, iterator = NewtonRaphson(f,df,root,a_tol1,iterator,n_max,data1,printdata)
 print_convergence_table(printdata)
 
-#GraficarDiferencia(data1,data2,data3)
+GraficarDiferencia(data1,data2,data3)
 
 
-"""
+
 ##########
 ## EJ2
 #Repetir el procedimiento realizado en el ítem 1) para el caso m=0.3*m0
@@ -521,7 +482,7 @@ print ('------------------------------------------------------------------------
 print('--- EJ 2 ---')
 
 a_tol1 = 0.5e-15
-n_max = 100
+n_max = 10000
 
 print('----------------')
 print('Metodo biseccion')
@@ -539,14 +500,15 @@ print_start_table(printdata)
 print ('-----------------')
 a = -0.5
 b = 0.6
+printdata=[]
 r, delta, n_iter = bisec(f2, a, b, a_tol1, n_max,dataB2,printdata)
 print_start_table(printdata)
 print ('-----------------')
 a = 0.8
 b = 5
+printdata=[]
 r, delta, n_iter = bisec(f2, a, b, a_tol1, n_max,dataB3,printdata)
 print_start_table(printdata)
-
 
 print('----------------')
 print('Metodo punto fijo')
@@ -556,17 +518,24 @@ dataPF1 = []
 dataPF2 = []
 dataPF3 = []
 printdata=[]
+
 #print('K,Yk,delta Y,deltaY/Yk,lambda,p')
 root=-1
-root, iterator = FixedPoint(gf2,root,a_tol1,iterator,n_max,dataPF1,printdata)
+root, iterator = FixedPoint(gf3,root,a_tol1,iterator,n_max,dataPF1,printdata)
 print_convergence_table(printdata)
 print ('-----------------')
+
 root=0
+iterator=0
+printdata=[]
+# cambiamos de funcion g(x) ya que no converge a la raiz primera negativa en el intervalo proximo a la raiz
 root, iterator = FixedPoint(gf2,root,a_tol1,iterator,n_max,dataPF2,printdata)
 print_convergence_table(printdata)
 print ('-----------------')
 root=1
-root, iterator = FixedPoint(gf2,root,a_tol1,iterator,n_max,dataPF3,printdata)
+iterator=0
+printdata=[]
+root, iterator = FixedPoint(gf3,root,a_tol1,iterator,n_max,dataPF3,printdata)
 print_convergence_table(printdata)
 
 
@@ -581,58 +550,54 @@ printdata = []
 counter_array = []
 #print('K, Yk, delta Y, deltaY/Yk, lambda, p')
 
-root = -1
+root = -2
+printdata=[]
 root, iterator = NewtonRaphson(f2,df2,root,a_tol1,iterator,n_max,dataNR1,printdata)
-PrintMaxInteval(f2,df2,root)
+#PrintMaxInterval(f2,df2,root)
 print_convergence_table(printdata)
 print ('-----------------')
-root = 0
+root = 0.33
+iterator = 0
 root, iterator = NewtonRaphson(f2,df2,root,a_tol1,iterator,n_max,dataNR2,printdata)
-#PrintMaxInteval(f2,df2,root)
+#PrintMaxInterval(f2,df2,root)
 print_convergence_table(printdata)
 print ('-----------------')
 root = 1
+iterator = 0
+printdata=[]
 root, iterator = NewtonRaphson(f2,df2,root,a_tol1,iterator,n_max,dataNR3,printdata)
-PrintMaxInteval(f2,df2,root)
+#PrintMaxInterval(f2,df2,root)
 print_convergence_table(printdata)
 
-#GraficarDiferencia(dataNR1,dataPF1,dataB1)
-
-"""
-
-"""
-start, end = maxIntervalNewtonRaphson(0,f2,df2,a_tol1)
-print ('start:{1:}, end:{2:}'.format(start,end))
+GraficarDiferencia(dataNR1,dataPF1,dataB1)
+GraficarDiferencia(dataNR2,dataPF2,dataB2)
+GraficarDiferencia(dataNR3,dataPF3,dataB3)
 
 
-print('----------------')
-print('Metodo secante')
-print('----------------')
-print('')
-print('Funcion f1, a_tol = '+str(a_tol1))
-r, delta, n_iter = secante(f1, a, b, a_tol1, n_max)
-print('raiz = ' +str(r))
-print('delta= ' +str(delta))
-print('n_ite= ' +str(n_iter))
-print('')
-print('Funcion f1, a_tol = '+str(a_tol2))
-r, delta, n_iter = secante(f1, a, b, a_tol2, n_max)
-print('raiz = ' +str(r))
-print('delta= ' +str(delta))
-print('n_ite= ' +str(n_iter))
-print('')
 
-print('----------------')
-print('Metodo brent')
-print('----------------')
-print('')
-print('Funcion f1, a_tol por defecto para la funcion')
-#https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html
-r, results = brentq(f1, a, b, full_output=True)
-print('raiz = ' +str(r))
-print('Resultados: ')
-print(results)
+##########
+## EJ3
+#Solamente para el método de Newton-Raphson y aplicado al caso del ítem 2), encontrar el
+#máximo intervalo de convergencia de cada raíz, es decir, el intervalo de mayor longitud
+#posible en el cual cualquier semilla perteneciente a él hace que el método converja
+##########
+print ('--------------------------------------------------------------------------------')
+print('--- EJ 3 ---')
 
-"""
+iterator = 0
+dataNR1 = []
+dataNR3 = []
+counter_array = []
+root = -1
+printdata=[]
+root, iterator = NewtonRaphson(f2,df2,root,a_tol1,iterator,n_max,dataNR1,printdata)
+PrintMaxInterval(f2,df2,root)
+
+root = 1
+iterator = 0
+printdata=[]
+root, iterator = NewtonRaphson(f2,df2,root,a_tol1,iterator,n_max,dataNR3,printdata)
+PrintMaxInterval(f2,df2,root)
+
 
 
